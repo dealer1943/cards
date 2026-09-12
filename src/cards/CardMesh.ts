@@ -6,11 +6,12 @@ import {
   createChipTexture,
   createFaceTexture,
 } from './textures';
+import { CARD_THICKNESS, TABLE_SURFACE_Y } from '../table/surface';
 
 export const CARD_W = 0.63;
 export const CARD_H = 0.88;
 /** Slight thickness so rims catch light. */
-export const CARD_D = 0.028;
+export const CARD_D = CARD_THICKNESS;
 
 export interface AnimTarget {
   position: THREE.Vector3;
@@ -143,7 +144,7 @@ function easeOutCubic(t: number): number {
   return 1 - Math.pow(1 - t, 3);
 }
 
-export function makeChip(color: number, label: string, y = 0.03): THREE.Mesh {
+export function makeChip(color: number, label: string, y = TABLE_SURFACE_Y): THREE.Mesh {
   const geo = new THREE.CylinderGeometry(0.18, 0.18, 0.04, 32);
   const hex = '#' + color.toString(16).padStart(6, '0');
   const mat = new THREE.MeshStandardMaterial({

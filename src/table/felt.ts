@@ -1,4 +1,17 @@
 import * as THREE from 'three';
+import { FELT_SURFACE_Y } from './surface';
+
+export type TableStyleId = 'nap' | 'plain';
+
+export const TABLE_STYLES: { id: TableStyleId; label: string }[] = [
+  { id: 'nap', label: 'Casino nap' },
+  { id: 'plain', label: 'Plain felt' },
+];
+
+const FELT_W = 7.5;
+const FELT_D = 4.6;
+const FELT_CORNER = 0.55;
+const FELT_DEPTH = 0.09;
 
 /** Soft procedural nap / noise for casino felt (no external textures). */
 function createFeltNapTexture(size = 512): THREE.CanvasTexture {
@@ -54,6 +67,33 @@ function clampByte(v: number): number {
   return Math.max(0, Math.min(255, v | 0));
 }
 
+function createNapMaterial(): THREE.MeshStandardMaterial {
+  return new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    map: createFeltNapTexture(),
+    roughness: 0.94,
+    metalness: 0.0,
+  });
+}
+
+/** Clean solid casino green — no visible nap / pattern / noise. */
+function createPlainMaterial(): THREE.MeshStandardMaterial {
+  return new THREE.MeshStandardMaterial({
+    color: 0x1a6b3c,
+    roughness: 0.92,
+    metalness: 0.0,
+  });
+}
+
+function disposeMaterial(mat: THREE.Material): void {
+  const m = mat as THREE.MeshStandardMaterial;
+  if (m.map) {
+    m.map.dispose();
+    m.map = null;
+  }
+  m.dispose();
+}
+
 /** Wooden rail rim around the felt. */
 function createWoodRail(w: number, d: number): THREE.Mesh {
   const shape = new THREE.Shape();
@@ -107,15 +147,7 @@ function createWoodRail(w: number, d: number): THREE.Mesh {
   return mesh;
 }
 
-/** Rounded green felt playing surface with nap + wood rail. */
-export function createFelt(): THREE.Group {
-  const group = new THREE.Group();
-  group.name = 'felt';
-
-  const w = 7.5;
-  const d = 4.6;
-  const r = 0.55;
-
+function createFeltShape(w: number, d: number, r: number): THREE.Shape {
   const shape = new THREE.Shape();
   shape.moveTo(-w / 2 + r, -d / 2);
   shape.lineTo(w / 2 - r, -d / 2);
@@ -126,9 +158,21 @@ export function createFelt(): THREE.Group {
   shape.quadraticCurveTo(-w / 2, d / 2, -w / 2, d / 2 - r);
   shape.lineTo(-w / 2, -d / 2 + r);
   shape.quadraticCurveTo(-w / 2, -d / 2, -w / 2 + r, -d / 2);
+  return shape;
+}
 
-  const geo = new THREE.ExtrudeGeometry(shape, {
-    depth: 0.09,
+/** Rounded green felt playing surface with wood rail. Style is swappable live. */
+export function createFelt(style: TableStyleId = 'nap'): THREE.Group {
+  const group = new THREE.Group();
+  group.name = 'felt';
+  group.userData.tableStyle = style as TableStyleId;
+
+  const w = FELT_W;
+  const d = FELT_D;
+  const r = FELT_CORNER;
+
+  const geo = new THREE.ExtrudeGeometry(createFeltShape(w, d, r), {
+    depth: FELT_DEPTH,
     bevelEnabled: true,
     bevelThickness: 0.035,
     bevelSize: 0.035,
@@ -136,16 +180,12 @@ export function createFelt(): THREE.Group {
   });
   geo.rotateX(-Math.PI / 2);
 
-  const nap = createFeltNapTexture();
-  const mat = new THREE.MeshStandardMaterial({
-    color: 0xffffff,
-    map: nap,
-    roughness: 0.94,
-    metalness: 0.0,
-  });
+  const mat = style === 'plain' ? createPlainMaterial() : createNapMaterial();
   const mesh = new THREE.Mesh(geo, mat);
+  mesh.name = 'felt-surface';
   mesh.receiveShadow = true;
-  mesh.position.y = -0.03;
+  // Extrusion maps to +Y after rotateX; pin the top face to FELT_SURFACE_Y.
+  mesh.position.y = FELT_SURFACE_Y - FELT_DEPTH;
   group.add(mesh);
 
   // Dark padded cushion under the wood (classic table sandwich)
@@ -164,4 +204,19 @@ export function createFelt(): THREE.Group {
   group.add(createWoodRail(w, d));
 
   return group;
+}
+
+/** Swap nap ↔ plain felt on an existing table without remounting games. */
+export function setFeltStyle(group: THREE.Group, style: TableStyleId): void {
+  if (group.userData.tableStyle === style) return;
+  const mesh = group.getObjectByName('felt-surface') as THREE.Mesh | undefined;
+  if (!mesh) return;
+
+  const prev = mesh.material;
+  const next = style === 'plain' ? createPlainMaterial() : createNapMaterial();
+  mesh.material = next;
+  group.userData.tableStyle = style;
+
+  if (Array.isArray(prev)) prev.forEach(disposeMaterial);
+  else disposeMaterial(prev as THREE.Material);
 }

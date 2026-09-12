@@ -3,6 +3,7 @@ import { CardId } from '../cards/textures';
 import { CardMesh, makeChip } from '../cards/CardMesh';
 import { CardPool, Deck } from '../cards/deck';
 import { dealTo, layoutRow } from '../cards/anim';
+import { TABLE_SURFACE_Y } from '../table/surface';
 import {
   compareHands,
   evaluateBest,
@@ -87,7 +88,7 @@ export class HoldemGame implements GameMode {
       const angle = (i / n) * Math.PI * 2;
       chip.position.set(
         Math.cos(angle) * 0.35,
-        0.03 + (i % 3) * 0.04,
+        TABLE_SURFACE_Y + (i % 3) * 0.04,
         Math.sin(angle) * 0.25,
       );
       this.ctx.chipGroup.add(chip);

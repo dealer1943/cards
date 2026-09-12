@@ -31,6 +31,7 @@ Open the URL Vite prints (default `http://localhost:5173`).
 ### Controls
 
 - **Game picker** (top): switch Blackjack / Hold'em / Solitaire (state resets cleanly).
+- **Tables** (top): switch **Casino nap** (patterned felt) or **Plain felt** (solid green) live — games keep playing.
 - **Action buttons** (bottom HUD): bet, deal, hit/stand, check/call/raise/fold, draw, new game, etc.
 - **Solitaire**: click a face-up card, then click a destination pile (or empty king/ace slot). Click the stock (or **Draw 3**) to draw. Double-click a card to try auto-move to foundation. Empty stock click recycles the waste.
 - **Camera**: drag on the table background for a mild orbit peek (clamped).

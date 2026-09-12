@@ -3,6 +3,7 @@ import { CardId } from '../cards/textures';
 import { CardMesh, makeChip } from '../cards/CardMesh';
 import { CardPool, Deck } from '../cards/deck';
 import { dealTo, layoutRow } from '../cards/anim';
+import { TABLE_SURFACE_Y } from '../table/surface';
 import { blackjackTotal, isBlackjack } from './handEval';
 import type { GameContext, GameMode } from './types';
 
@@ -72,7 +73,7 @@ export class BlackjackGame implements GameMode {
     const n = Math.min(8, Math.max(1, Math.ceil(this.bet / 25) || Math.ceil(this.pendingBet / 25)));
     for (let i = 0; i < n; i++) {
       const chip = makeChip(0xb22222, String(this.bet || this.pendingBet));
-      chip.position.set(-2.2 + (i % 4) * 0.12, 0.03 + Math.floor(i / 4) * 0.05, 1.1);
+      chip.position.set(-2.2 + (i % 4) * 0.12, TABLE_SURFACE_Y + Math.floor(i / 4) * 0.05, 1.1);
       this.ctx.chipGroup.add(chip);
       this.chips.push(chip);
     }

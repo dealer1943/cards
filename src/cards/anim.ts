@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { CardMesh } from './CardMesh';
+import { TABLE_SURFACE_Y } from '../table/surface';
 
 /** Dealer shoe / deal origin above the near rail. */
 export const DEAL_ORIGIN = new THREE.Vector3(0, 1.35, 3.05);
@@ -46,7 +47,7 @@ export function layoutRow(
   centerX: number,
   z: number,
   spacing = 0.72,
-  y = 0.03,
+  y = TABLE_SURFACE_Y,
 ): THREE.Vector3[] {
   const positions: THREE.Vector3[] = [];
   const start = centerX - ((count - 1) * spacing) / 2;

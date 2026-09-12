@@ -46,6 +46,10 @@ export function startApp(): void {
   hud.onAction((id) => {
     void current.onAction(id);
   });
+  hud.setTableStyle(table.getTableStyle());
+  hud.onTableStyleChange((style) => {
+    table.setTableStyle(style);
+  });
 
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();

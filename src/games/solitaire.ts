@@ -3,6 +3,7 @@ import { CardId, rankValue, Suit } from '../cards/textures';
 import { CARD_H, CARD_W, CardMesh } from '../cards/CardMesh';
 import { CardPool, Deck } from '../cards/deck';
 import type { GameContext, GameMode } from './types';
+import { TABLE_SURFACE_Y } from '../table/surface';
 
 type PileKind = 'stock' | 'waste' | 'foundation' | 'tableau';
 
@@ -111,7 +112,7 @@ export class SolitaireGame implements GameMode {
 
   private pileWorldPos(pile: Pile, cardIndex: number): THREE.Vector3 {
     if (pile.kind === 'stock') {
-      return new THREE.Vector3(STOCK_X, 0.03 + cardIndex * 0.008, TOP_Z);
+      return new THREE.Vector3(STOCK_X, TABLE_SURFACE_Y + cardIndex * 0.008, TOP_Z);
     }
     if (pile.kind === 'waste') {
       // fan last few
@@ -119,19 +120,19 @@ export class SolitaireGame implements GameMode {
       const fan = Math.min(2, Math.max(0, 2 - fromEnd));
       return new THREE.Vector3(
         WASTE_X - fan * 0.22,
-        0.03 + cardIndex * 0.01,
+        TABLE_SURFACE_Y + cardIndex * 0.01,
         TOP_Z,
       );
     }
     if (pile.kind === 'foundation') {
       const x = TAB_X0 + pile.index * TAB_DX;
-      return new THREE.Vector3(x, 0.03 + cardIndex * 0.012, FOUND_Z);
+      return new THREE.Vector3(x, TABLE_SURFACE_Y + cardIndex * 0.012, FOUND_Z);
     }
     // tableau
     const x = TAB_X0 + pile.index * TAB_DX;
     return new THREE.Vector3(
       x,
-      0.03 + cardIndex * 0.01,
+      TABLE_SURFACE_Y + cardIndex * 0.01,
       TAB_Z + cardIndex * ROW_DZ,
     );
   }

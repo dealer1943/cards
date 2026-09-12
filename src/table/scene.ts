@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createFelt } from './felt';
+import { createFelt, setFeltStyle, type TableStyleId } from './felt';
 import { createLights } from './lights';
 import { createTableCamera, MildOrbit } from './camera';
 
@@ -9,7 +9,10 @@ export interface TableScene {
   camera: THREE.PerspectiveCamera;
   cardGroup: THREE.Group;
   chipGroup: THREE.Group;
+  felt: THREE.Group;
   orbit: MildOrbit;
+  setTableStyle: (style: TableStyleId) => void;
+  getTableStyle: () => TableStyleId;
   resize: () => void;
   dispose: () => void;
 }
@@ -34,7 +37,8 @@ export function createTableScene(canvas: HTMLCanvasElement): TableScene {
 
   const camera = createTableCamera(window.innerWidth / window.innerHeight);
   createLights(scene);
-  scene.add(createFelt());
+  const felt = createFelt('nap');
+  scene.add(felt);
 
   const cardGroup = new THREE.Group();
   cardGroup.name = 'cards';
@@ -75,6 +79,13 @@ export function createTableScene(canvas: HTMLCanvasElement): TableScene {
     camera,
     cardGroup,
     chipGroup,
+    felt,
+    setTableStyle(style) {
+      setFeltStyle(felt, style);
+    },
+    getTableStyle() {
+      return (felt.userData.tableStyle as TableStyleId) ?? 'nap';
+    },
     orbit,
     resize,
     dispose: () => {
