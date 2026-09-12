@@ -1,0 +1,164 @@
+:root {
+  color-scheme: dark;
+  --panel: rgba(12, 14, 20, 0.72);
+  --panel-border: rgba(255, 255, 255, 0.12);
+  --accent: #c9a227;
+  --text: #f2efe6;
+  --muted: #a8a296;
+  --btn: #243528;
+  --btn-hover: #2f4634;
+  --danger: #6b2a2a;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #1a1520;
+  color: var(--text);
+}
+
+#app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+#scene {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+#hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 12px 14px;
+}
+
+.hud-top,
+.hud-bottom {
+  pointer-events: auto;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.hud-top {
+  justify-content: space-between;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  padding: 10px 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.brand {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  font-size: 1.05rem;
+}
+
+.mode-switch {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.mode-switch button,
+.actions button {
+  appearance: none;
+  border: 1px solid var(--panel-border);
+  background: var(--btn);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.mode-switch button:hover,
+.actions button:hover:not(:disabled) {
+  background: var(--btn-hover);
+}
+
+.mode-switch button.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.actions button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.status-panel {
+  min-width: min(420px, 92vw);
+  max-width: 520px;
+}
+
+.status-panel h2 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.status-panel .status {
+  margin: 0 0 8px;
+  color: var(--accent);
+  font-size: 0.95rem;
+}
+
+.status-panel ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.hint {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 0.8rem;
+  align-self: center;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 4px 8px;
+}
+
+@media (max-width: 700px) {
+  .hint {
+    display: none;
+  }
+  .hud-bottom {
+    flex-direction: column;
+  }
+}
