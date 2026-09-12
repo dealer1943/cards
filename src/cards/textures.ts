@@ -46,10 +46,10 @@ export const SUIT_SYMBOL: Record<Suit, string> = {
 };
 
 export const SUIT_COLOR: Record<Suit, string> = {
-  S: '#1a1a1a',
-  H: '#c0392b',
-  D: '#c0392b',
-  C: '#1a1a1a',
+  S: '#141414',
+  H: '#b91c1c',
+  D: '#b91c1c',
+  C: '#141414',
 };
 
 export function cardKey(c: CardId): string {
@@ -83,7 +83,121 @@ function roundRect(
   ctx.closePath();
 }
 
-export function createFaceTexture(card: CardId, w = 256, h = 384): THREE.CanvasTexture {
+/** Classic pip layouts (normalized 0–1 inside the face). */
+function pipLayout(rank: Rank): Array<[number, number]> {
+  const cx = 0.5;
+  const L = 0.32;
+  const R = 0.68;
+  const t = 0.22;
+  const m = 0.5;
+  const b = 0.78;
+  const tm = 0.34;
+  const bm = 0.66;
+  switch (rank) {
+    case 'A':
+      return [[cx, m]];
+    case '2':
+      return [
+        [cx, t],
+        [cx, b],
+      ];
+    case '3':
+      return [
+        [cx, t],
+        [cx, m],
+        [cx, b],
+      ];
+    case '4':
+      return [
+        [L, t],
+        [R, t],
+        [L, b],
+        [R, b],
+      ];
+    case '5':
+      return [
+        [L, t],
+        [R, t],
+        [cx, m],
+        [L, b],
+        [R, b],
+      ];
+    case '6':
+      return [
+        [L, t],
+        [R, t],
+        [L, m],
+        [R, m],
+        [L, b],
+        [R, b],
+      ];
+    case '7':
+      return [
+        [L, t],
+        [R, t],
+        [cx, tm],
+        [L, m],
+        [R, m],
+        [L, b],
+        [R, b],
+      ];
+    case '8':
+      return [
+        [L, t],
+        [R, t],
+        [cx, tm],
+        [L, m],
+        [R, m],
+        [cx, bm],
+        [L, b],
+        [R, b],
+      ];
+    case '9':
+      return [
+        [L, t],
+        [R, t],
+        [L, 0.38],
+        [R, 0.38],
+        [cx, m],
+        [L, 0.62],
+        [R, 0.62],
+        [L, b],
+        [R, b],
+      ];
+    case '10':
+      return [
+        [L, t],
+        [R, t],
+        [cx, 0.3],
+        [L, 0.4],
+        [R, 0.4],
+        [L, 0.6],
+        [R, 0.6],
+        [cx, 0.7],
+        [L, b],
+        [R, b],
+      ];
+    default:
+      return [[cx, m]];
+  }
+}
+
+function drawCorner(
+  ctx: CanvasRenderingContext2D,
+  label: string,
+  sym: string,
+  color: string,
+): void {
+  ctx.fillStyle = color;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.font = `bold ${label === '10' ? 40 : 46}px "Segoe UI", Georgia, serif`;
+  ctx.fillText(label, 0, 0);
+  ctx.font = '34px Georgia, serif';
+  ctx.fillText(sym, label === '10' ? 2 : 6, 48);
+}
+
+export function createFaceTexture(card: CardId, w = 288, h = 420): THREE.CanvasTexture {
   const key = `face:${cardKey(card)}`;
   const hit = texCache.get(key);
   if (hit) return hit;
@@ -93,52 +207,81 @@ export function createFaceTexture(card: CardId, w = 256, h = 384): THREE.CanvasT
   canvas.height = h;
   const ctx = canvas.getContext('2d')!;
 
-  // Card body
-  ctx.fillStyle = '#f7f3e8';
-  roundRect(ctx, 4, 4, w - 8, h - 8, 18);
+  // Soft paper body + rim
+  ctx.fillStyle = '#f4efe4';
+  roundRect(ctx, 3, 3, w - 6, h - 6, 20);
   ctx.fill();
-  ctx.strokeStyle = '#d0c8b0';
-  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#cfc6b4';
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+  // Inner hairline
+  ctx.strokeStyle = '#e7e0d2';
+  ctx.lineWidth = 1;
+  roundRect(ctx, 10, 10, w - 20, h - 20, 14);
   ctx.stroke();
 
   const color = SUIT_COLOR[card.suit];
   const sym = SUIT_SYMBOL[card.suit];
   const label = card.rank;
+  const isFace = label === 'J' || label === 'Q' || label === 'K';
 
-  ctx.fillStyle = color;
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'top';
-  ctx.font = `bold ${label === '10' ? 42 : 48}px Georgia, serif`;
-  ctx.fillText(label, 18, 16);
-  ctx.font = '36px Georgia, serif';
-  ctx.fillText(sym, 22, 68);
-
-  // Center pip
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.font = '120px Georgia, serif';
-  ctx.fillText(sym, w / 2, h / 2);
+  // Top-left corner
+  ctx.save();
+  ctx.translate(16, 14);
+  drawCorner(ctx, label, sym, color);
+  ctx.restore();
 
   // Bottom-right mirrored
   ctx.save();
-  ctx.translate(w - 18, h - 16);
+  ctx.translate(w - 16, h - 14);
   ctx.rotate(Math.PI);
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'top';
-  ctx.font = `bold ${label === '10' ? 42 : 48}px Georgia, serif`;
-  ctx.fillText(label, 0, 0);
-  ctx.font = '36px Georgia, serif';
-  ctx.fillText(sym, 4, 52);
+  drawCorner(ctx, label, sym, color);
   ctx.restore();
+
+  ctx.fillStyle = color;
+  if (isFace || label === 'A') {
+    // Large center emblem for A / face cards
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = `${label === 'A' ? 150 : 120}px Georgia, serif`;
+    ctx.fillText(sym, w / 2, h / 2 + (label === 'A' ? 0 : 8));
+    if (isFace) {
+      ctx.font = 'bold 52px Georgia, serif';
+      ctx.fillText(label, w / 2, h / 2 - 78);
+    }
+  } else {
+    // Number pips
+    const pads = { l: 48, r: 48, t: 70, b: 70 };
+    const iw = w - pads.l - pads.r;
+    const ih = h - pads.t - pads.b;
+    const pipSize = label === '10' ? 42 : 48;
+    ctx.font = `${pipSize}px Georgia, serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (const [nx, ny] of pipLayout(label)) {
+      const px = pads.l + nx * iw;
+      const py = pads.t + ny * ih;
+      // Flip lower-half pips for classic look
+      if (ny > 0.55) {
+        ctx.save();
+        ctx.translate(px, py);
+        ctx.rotate(Math.PI);
+        ctx.fillText(sym, 0, 0);
+        ctx.restore();
+      } else {
+        ctx.fillText(sym, px, py);
+      }
+    }
+  }
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 4;
+  tex.anisotropy = 8;
   texCache.set(key, tex);
   return tex;
 }
 
-export function createBackTexture(w = 256, h = 384): THREE.CanvasTexture {
+export function createBackTexture(w = 288, h = 420): THREE.CanvasTexture {
   const key = 'back';
   const hit = texCache.get(key);
   if (hit) return hit;
@@ -148,36 +291,59 @@ export function createBackTexture(w = 256, h = 384): THREE.CanvasTexture {
   canvas.height = h;
   const ctx = canvas.getContext('2d')!;
 
-  ctx.fillStyle = '#0d2137';
-  roundRect(ctx, 4, 4, w - 8, h - 8, 18);
+  ctx.fillStyle = '#0c1f33';
+  roundRect(ctx, 3, 3, w - 6, h - 6, 20);
   ctx.fill();
 
-  // Decorative diamond lattice
-  ctx.strokeStyle = '#1e4d6b';
-  ctx.lineWidth = 2;
-  const step = 28;
-  for (let y = 20; y < h - 20; y += step) {
-    for (let x = 20; x < w - 20; x += step) {
-      ctx.strokeRect(x, y, step - 6, step - 6);
+  // Diamond lattice
+  ctx.save();
+  ctx.beginPath();
+  roundRect(ctx, 18, 18, w - 36, h - 36, 12);
+  ctx.clip();
+  ctx.strokeStyle = '#1a4560';
+  ctx.lineWidth = 1.5;
+  const step = 22;
+  for (let y = -h; y < h * 2; y += step) {
+    for (let x = -w; x < w * 2; x += step) {
+      ctx.beginPath();
+      ctx.moveTo(x, y + step / 2);
+      ctx.lineTo(x + step / 2, y);
+      ctx.lineTo(x + step, y + step / 2);
+      ctx.lineTo(x + step / 2, y + step);
+      ctx.closePath();
+      ctx.stroke();
     }
   }
+  ctx.restore();
 
-  // Inner border
-  ctx.strokeStyle = '#c9a227';
-  ctx.lineWidth = 6;
-  roundRect(ctx, 16, 16, w - 32, h - 32, 12);
+  // Gold double border
+  ctx.strokeStyle = '#d4a017';
+  ctx.lineWidth = 5;
+  roundRect(ctx, 14, 14, w - 28, h - 28, 14);
+  ctx.stroke();
+  ctx.strokeStyle = '#f0d78c';
+  ctx.lineWidth = 1.5;
+  roundRect(ctx, 22, 22, w - 44, h - 44, 10);
   ctx.stroke();
 
-  ctx.fillStyle = '#c9a227';
-  ctx.font = 'bold 28px Georgia, serif';
+  // Center medallion
+  ctx.fillStyle = 'rgba(12, 31, 51, 0.82)';
+  roundRect(ctx, w / 2 - 70, h / 2 - 42, 140, 84, 12);
+  ctx.fill();
+  ctx.strokeStyle = '#d4a017';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  ctx.fillStyle = '#e8c547';
+  ctx.font = 'bold 26px Georgia, serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('FELT', w / 2, h / 2 - 16);
+  ctx.fillText('FELT', w / 2, h / 2 - 12);
   ctx.fillText('TABLE', w / 2, h / 2 + 16);
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 4;
+  tex.anisotropy = 8;
   texCache.set(key, tex);
   return tex;
 }

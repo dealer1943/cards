@@ -203,12 +203,12 @@ export class HoldemGame implements GameMode {
       const hc = this.pool.getOrCreate(this.hero[i]!);
       hc.mesh.position.set(0, 2, 4);
       this.heroMeshes.push(hc);
-      await dealTo(hc, hPos[i]!, true, 0, 0.3);
+      await dealTo(hc, hPos[i]!, true, i * 0.1, 0.48);
 
       const vc = this.pool.getOrCreate(this.villain[i]!);
       vc.mesh.position.set(0, 2, 4);
       this.villainMeshes.push(vc);
-      await dealTo(vc, vPos[i]!, false, 0, 0.3);
+      await dealTo(vc, vPos[i]!, false, i * 0.1 + 0.05, 0.48);
     }
 
     this.message = this.toCall > 0 ? `Call $${this.toCall}, Raise, or Fold` : 'Check, Raise, or Fold';
@@ -386,7 +386,7 @@ export class HoldemGame implements GameMode {
       const mesh = this.pool.getOrCreate(this.board[idx]!);
       mesh.mesh.position.set(0, 2, 4);
       this.boardMeshes.push(mesh);
-      await dealTo(mesh, positions[idx]!, true, 0, 0.35);
+      await dealTo(mesh, positions[idx]!, true, idx * 0.08, 0.48);
     }
   }
 

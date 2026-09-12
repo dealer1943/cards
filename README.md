@@ -35,6 +35,10 @@ Open the URL Vite prints (default `http://localhost:5173`).
 - **Solitaire**: click a face-up card, then click a destination pile (or empty king/ace slot). Click the stock (or **Draw 3**) to draw. Double-click a card to try auto-move to foundation. Empty stock click recycles the waste.
 - **Camera**: drag on the table background for a mild orbit peek (clamped).
 
+## Shared table feel (slice 1 polish)
+
+Felt nap texture + wooden rail, richer procedural card faces/backs with thickness, eased deal arcs/flips, and a slightly tighter camera with gentle orbit settle. Game rules unchanged — polish lives in `src/table/*` and `src/cards/*`.
+
 ## Develop
 
 ### Folder map

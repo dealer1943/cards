@@ -1,23 +1,40 @@
 import * as THREE from 'three';
 import { CardMesh } from './CardMesh';
 
+/** Dealer shoe / deal origin above the near rail. */
+export const DEAL_ORIGIN = new THREE.Vector3(0, 1.35, 3.05);
+
+/**
+ * Smooth deal with ease, slight arc, and in-flight flip.
+ * Prefer stagger via `delay` so hands feel sequential, not teleported.
+ */
 export function dealTo(
   card: CardMesh,
   pos: THREE.Vector3,
   faceUp: boolean,
   delay = 0,
-  duration = 0.4,
+  duration = 0.48,
+  options?: { arcHeight?: number; from?: THREE.Vector3 },
 ): Promise<void> {
   return new Promise((resolve) => {
     const start = () => {
+      const from = options?.from ?? DEAL_ORIGIN;
       card.mesh.visible = true;
-      const rot = new THREE.Euler(
-        faceUp ? 0 : Math.PI,
-        0,
-        0,
+      card.mesh.position.copy(from);
+      card.setFaceUp(false, true);
+
+      const targetRot = new THREE.Euler(faceUp ? 0 : Math.PI, 0, 0);
+      // Small yaw twist while flipping so the motion reads less linear
+      const startRot = new THREE.Euler(
+        Math.PI,
+        faceUp ? 0.35 : 0,
+        faceUp ? -0.08 : 0,
       );
+      card.mesh.rotation.copy(startRot);
       card.faceUp = faceUp;
-      card.animateTo(pos, rot, duration, () => resolve());
+
+      const arc = options?.arcHeight ?? Math.min(0.55, 0.28 + from.distanceTo(pos) * 0.08);
+      card.animateTo(pos, targetRot, duration, () => resolve(), arc);
     };
     if (delay <= 0) start();
     else setTimeout(start, delay * 1000);
@@ -39,6 +56,6 @@ export function layoutRow(
   return positions;
 }
 
-export function stackOffset(i: number, base: THREE.Vector3, dy = 0.012): THREE.Vector3 {
+export function stackOffset(i: number, base: THREE.Vector3, dy = 0.014): THREE.Vector3 {
   return new THREE.Vector3(base.x, base.y + i * dy, base.z);
 }

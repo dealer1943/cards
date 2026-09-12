@@ -25,10 +25,12 @@ export function createTableScene(canvas: HTMLCanvasElement): TableScene {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x1a1520);
-  scene.fog = new THREE.Fog(0x1a1520, 14, 28);
+  scene.background = new THREE.Color(0x14101a);
+  scene.fog = new THREE.Fog(0x14101a, 12, 26);
 
   const camera = createTableCamera(window.innerWidth / window.innerHeight);
   createLights(scene);
@@ -45,10 +47,14 @@ export function createTableScene(canvas: HTMLCanvasElement): TableScene {
   // Floor under table
   const floor = new THREE.Mesh(
     new THREE.PlaneGeometry(40, 40),
-    new THREE.MeshLambertMaterial({ color: 0x121018 }),
+    new THREE.MeshStandardMaterial({
+      color: 0x100e16,
+      roughness: 0.95,
+      metalness: 0.0,
+    }),
   );
   floor.rotation.x = -Math.PI / 2;
-  floor.position.y = -0.2;
+  floor.position.y = -0.22;
   floor.receiveShadow = true;
   scene.add(floor);
 

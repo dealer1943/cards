@@ -66,6 +66,7 @@ export function startApp(): void {
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     current.update(dt);
+    table.orbit.update(dt);
     table.renderer.render(table.scene, table.camera);
     requestAnimationFrame(frame);
   }

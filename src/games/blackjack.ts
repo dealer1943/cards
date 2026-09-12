@@ -200,16 +200,12 @@ export class BlackjackGame implements GameMode {
 
     for (let i = 0; i < 2; i++) {
       const pc = this.pool.getOrCreate(this.player[i]!);
-      pc.mesh.position.set(0, 1.5, 3);
-      pc.setFaceUp(false, true);
       this.playerMeshes.push(pc);
-      await dealTo(pc, pPos[i]!, true, 0, 0.35);
+      await dealTo(pc, pPos[i]!, true, i * 0.12, 0.48);
 
       const dc = this.pool.getOrCreate(this.dealer[i]!);
-      dc.mesh.position.set(0, 1.5, 3);
-      dc.setFaceUp(false, true);
       this.dealerMeshes.push(dc);
-      await dealTo(dc, dPos[i]!, i === 0, 0, 0.35);
+      await dealTo(dc, dPos[i]!, i === 0, 0.06, 0.48);
     }
 
     if (isBlackjack(this.player) || isBlackjack(this.dealer)) {
@@ -242,7 +238,7 @@ export class BlackjackGame implements GameMode {
         m.animateTo(pos[i]!, new THREE.Euler(0, 0, 0), 0.2);
       }
     }
-    await dealTo(mesh, pos[this.player.length - 1]!, true, 0, 0.35);
+    await dealTo(mesh, pos[this.player.length - 1]!, true, 0, 0.45);
 
     const tot = blackjackTotal(this.player).total;
     if (tot > 21) {
@@ -285,7 +281,7 @@ export class BlackjackGame implements GameMode {
     for (let i = 0; i < 2; i++) {
       this.playerMeshes[i]!.animateTo(pos[i]!, new THREE.Euler(0, 0, 0), 0.2);
     }
-    await dealTo(mesh, pos[2]!, true, 0, 0.35);
+    await dealTo(mesh, pos[2]!, true, 0, 0.45);
     const tot = blackjackTotal(this.player).total;
     if (tot > 21) {
       this.message = `Bust (${tot}) — you lose $${this.bet}`;
@@ -323,7 +319,7 @@ export class BlackjackGame implements GameMode {
       for (let i = 0; i < this.dealerMeshes.length - 1; i++) {
         this.dealerMeshes[i]!.animateTo(pos[i]!, new THREE.Euler(0, 0, 0), 0.2);
       }
-      await dealTo(mesh, pos[this.dealer.length - 1]!, true, 0, 0.35);
+      await dealTo(mesh, pos[this.dealer.length - 1]!, true, 0, 0.45);
     }
   }
 

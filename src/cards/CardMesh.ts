@@ -9,7 +9,8 @@ import {
 
 export const CARD_W = 0.63;
 export const CARD_H = 0.88;
-export const CARD_D = 0.02;
+/** Slight thickness so rims catch light. */
+export const CARD_D = 0.028;
 
 export interface AnimTarget {
   position: THREE.Vector3;
@@ -18,6 +19,8 @@ export interface AnimTarget {
   elapsed: number;
   fromPos: THREE.Vector3;
   fromRot: THREE.Euler;
+  /** Peak height above the straight-line lerp (deal arc). */
+  arcHeight: number;
   onDone?: () => void;
 }
 
@@ -26,21 +29,37 @@ export class CardMesh {
   readonly id: CardId;
   faceUp = false;
   private anim: AnimTarget | null = null;
-  private faceMat: THREE.MeshLambertMaterial;
-  private backMat: THREE.MeshLambertMaterial;
+  private faceMat: THREE.MeshStandardMaterial;
+  private backMat: THREE.MeshStandardMaterial;
+  private edgeMat: THREE.MeshStandardMaterial;
 
   constructor(id: CardId) {
     this.id = id;
     const geo = new THREE.BoxGeometry(CARD_W, CARD_D, CARD_H);
-    this.faceMat = new THREE.MeshLambertMaterial({
+    this.faceMat = new THREE.MeshStandardMaterial({
       map: createFaceTexture(id),
+      roughness: 0.72,
+      metalness: 0.02,
     });
-    this.backMat = new THREE.MeshLambertMaterial({
+    this.backMat = new THREE.MeshStandardMaterial({
       map: createBackTexture(),
+      roughness: 0.7,
+      metalness: 0.04,
     });
-    const edge = new THREE.MeshLambertMaterial({ color: 0xf0ead6 });
+    this.edgeMat = new THREE.MeshStandardMaterial({
+      color: 0xe8e0d0,
+      roughness: 0.85,
+      metalness: 0.0,
+    });
     // Box: +x -x +y -y +z -z — +y face, -y back
-    const mats = [edge, edge, this.faceMat, this.backMat, edge, edge];
+    const mats = [
+      this.edgeMat,
+      this.edgeMat,
+      this.faceMat,
+      this.backMat,
+      this.edgeMat,
+      this.edgeMat,
+    ];
     this.mesh = new THREE.Mesh(geo, mats);
     this.mesh.castShadow = true;
     this.mesh.receiveShadow = true;
@@ -63,15 +82,16 @@ export class CardMesh {
     this.animateTo(
       this.mesh.position.clone(),
       new THREE.Euler(targetX, this.mesh.rotation.y, this.mesh.rotation.z),
-      0.35,
+      0.38,
     );
   }
 
   animateTo(
     position: THREE.Vector3,
     rotation: THREE.Euler,
-    duration = 0.4,
+    duration = 0.45,
     onDone?: () => void,
+    arcHeight = 0,
   ): void {
     this.anim = {
       position: position.clone(),
@@ -80,6 +100,7 @@ export class CardMesh {
       elapsed: 0,
       fromPos: this.mesh.position.clone(),
       fromRot: this.mesh.rotation.clone(),
+      arcHeight,
       onDone,
     };
   }
@@ -90,6 +111,11 @@ export class CardMesh {
     const t = Math.min(1, this.anim.elapsed / this.anim.duration);
     const e = easeOutCubic(t);
     this.mesh.position.lerpVectors(this.anim.fromPos, this.anim.position, e);
+    if (this.anim.arcHeight > 0) {
+      // Parabolic lift: peaks mid-flight
+      const lift = Math.sin(Math.PI * t) * this.anim.arcHeight;
+      this.mesh.position.y += lift;
+    }
     this.mesh.rotation.x = lerp(this.anim.fromRot.x, this.anim.rotation.x, e);
     this.mesh.rotation.y = lerp(this.anim.fromRot.y, this.anim.rotation.y, e);
     this.mesh.rotation.z = lerp(this.anim.fromRot.z, this.anim.rotation.z, e);
@@ -102,8 +128,10 @@ export class CardMesh {
 
   dispose(): void {
     this.mesh.geometry.dispose();
+    // Face/back maps are shared via texCache — do not dispose them here.
     this.faceMat.dispose();
     this.backMat.dispose();
+    this.edgeMat.dispose();
   }
 }
 
@@ -118,8 +146,10 @@ function easeOutCubic(t: number): number {
 export function makeChip(color: number, label: string, y = 0.03): THREE.Mesh {
   const geo = new THREE.CylinderGeometry(0.18, 0.18, 0.04, 32);
   const hex = '#' + color.toString(16).padStart(6, '0');
-  const mat = new THREE.MeshLambertMaterial({
+  const mat = new THREE.MeshStandardMaterial({
     map: createChipTexture(hex, label),
+    roughness: 0.55,
+    metalness: 0.15,
   });
   const mesh = new THREE.Mesh(geo, mat);
   mesh.position.y = y;
