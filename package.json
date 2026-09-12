@@ -1,23 +1,23 @@
-{
-  "name": "felt-table",
-  "version": "0.1.0",
-  "private": true,
-  "description": "WebGL card table — Blackjack, Texas Hold'em, and Klondike Solitaire",
-  "type": "module",
-  "engines": {
-    "node": ">=18 <21"
-  },
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "three": "^0.185.0"
-  },
-  "devDependencies": {
-    "@types/three": "^0.185.0",
-    "typescript": "^5.7.0",
-    "vite": "^6.0.0"
-  }
+﻿{
+    "name":  "cards",
+    "version":  "0.1.0",
+    "private":  true,
+    "description":  "WebGL card table â€” Blackjack, Texas Hold\u0027em, and Klondike Solitaire",
+    "type":  "module",
+    "engines":  {
+                    "node":  "\u003e=18 \u003c21"
+                },
+    "scripts":  {
+                    "dev":  "vite",
+                    "build":  "tsc \u0026\u0026 vite build",
+                    "preview":  "vite preview"
+                },
+    "dependencies":  {
+                         "three":  "^0.185.0"
+                     },
+    "devDependencies":  {
+                            "@types/three":  "^0.185.0",
+                            "typescript":  "^5.7.0",
+                            "vite":  "^6.0.0"
+                        }
 }

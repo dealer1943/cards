@@ -1,6 +1,6 @@
-# Felt Table
+﻿# Cards
 
-WebGL card table in the browser — green felt, procedural cards, and three playable games:
+WebGL card table in the browser â€” green felt, procedural cards, and three playable games:
 
 1. **Blackjack** vs dealer  
 2. **Texas Hold'em** heads-up vs a simple AI  
@@ -37,7 +37,7 @@ Open the URL Vite prints (default `http://localhost:5173`).
 
 ## Shared table feel (slice 1 polish)
 
-Felt nap texture + wooden rail, richer procedural card faces/backs with thickness, eased deal arcs/flips, and a slightly tighter camera with gentle orbit settle. Game rules unchanged — polish lives in `src/table/*` and `src/cards/*`.
+Felt nap texture + wooden rail, richer procedural card faces/backs with thickness, eased deal arcs/flips, and a slightly tighter camera with gentle orbit settle. Game rules unchanged â€” polish lives in `src/table/*` and `src/cards/*`.
 
 ## Develop
 
@@ -46,14 +46,14 @@ Felt nap texture + wooden rail, richer procedural card faces/backs with thicknes
 ```
 src/
   main.ts              Entry
-  app.ts               Mode switch, render loop, pointer → games
+  app.ts               Mode switch, render loop, pointer â†’ games
   table/               Scene, felt, lights, camera / mild orbit
   cards/               CardMesh, deck pool, canvas textures, deal anim
   games/
     blackjack.ts
     holdem.ts
     solitaire.ts
-    handEval.ts        Blackjack totals + Hold'em 5–7 card evaluator
+    handEval.ts        Blackjack totals + Hold'em 5â€“7 card evaluator
     types.ts           GameMode / HUD contracts
   ui/                  HUD overlay (DOM) + css
   core/rng.ts          Seedable shuffle helper
@@ -65,8 +65,9 @@ Each mode implements `GameMode` (`mount` / `unmount` / `update` / `onAction` / `
 `app.ts` owns the Three.js table, swaps modes via the HUD, and clears card/chip groups on switch.  
 Games draw cards through `CardPool` (shared meshes + lerp animations) and push HUD state with `ctx.setHud`.
 
-Hand ranking for Hold'em lives in `handEval.ts` (high card → royal flush, best-of-21 for seven cards). Blackjack ace soft totals and 3:2 naturals are in the same module / `blackjack.ts`.
+Hand ranking for Hold'em lives in `handEval.ts` (high card â†’ royal flush, best-of-21 for seven cards). Blackjack ace soft totals and 3:2 naturals are in the same module / `blackjack.ts`.
 
 ## License
 
-MVP sample code — procedural card faces only (no third-party card art).
+MVP sample code â€” procedural card faces only (no third-party card art).
+
